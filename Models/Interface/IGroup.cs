@@ -3,8 +3,8 @@
     public interface IGroup
     {
         int Id { get; set; }
-        string GroupName { get; set; }
-        List<User> GroupMemberList { get; set; }
+        string Name { get; set; }
+        IEnumerable<User> MemberList { get; set; }
 
     }
 }
