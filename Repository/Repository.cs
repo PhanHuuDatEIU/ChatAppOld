@@ -4,29 +4,46 @@ namespace ChatApp.Repository
 {
     public class Repository<T> : IRepository<T> where T : class
     {
+        private readonly List<T> _list;
+        public Repository()
+        {
+            _list = new List<T>();
+        }
         public void Add(T entity)
         {
-            throw new NotImplementedException();
+            _list.Add(entity);
         }
 
-        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, string? includeProperties = null)
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null)
         {
-            throw new NotImplementedException();
+            IQueryable<T> query = _list.AsQueryable();
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }         
+            if (orderBy != null)
+            {
+                return orderBy(query).ToList();
+            }
+            return query;
         }
 
-        public T GetFirstOrDefault(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
+        public T GetFirstOrDefault(Expression<Func<T, bool>>? filter = null)
         {
-            throw new NotImplementedException();
+            IQueryable<T> query = _list.AsQueryable();
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+           
+            return query.FirstOrDefault();
         }
 
         public void Remove(T entity)
         {
-            throw new NotImplementedException();
+            _list.Remove(entity);
         }
 
-        public void RemoveRange(IEnumerable<T> entities)
-        {
-            throw new NotImplementedException();
-        }
+       
     }
 }
