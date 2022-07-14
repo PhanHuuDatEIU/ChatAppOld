@@ -5,10 +5,11 @@ namespace ChatApp.Models
     public class PublicGroup : IGroup
     {
         public int Id { get; set; }
-
+        
         public string GroupName { get; set; }
 
-        public List<User> GroupMemberList { get; set; } = new List<User>();
-
+        public string InviteCode { get; set; }
+        
+        public IEnumerable<User> GroupMemberList { get; set; }
     }
 }
