@@ -8,21 +8,20 @@ namespace ChatApp.Services
     {
         private readonly DataStorage dataStorage = DataStorage.GetDataStorage();
 
-        public string CreateNewGroup(string groupName,bool isPrivate = false, User? admin = null, List<User>? members = null)
-        {
+        //public string CreateNewGroup(string groupName,bool isPrivate = false, User? admin = null, List<User>? members = null)
+        //{
             
-            if (isPrivate)
-            {
-                dataStorage.PrivateGroups.Add(CreatePrivateGroup(groupName, admin, members));
-                return "craeted private group";
-            }
-            else
-            {
-                dataStorage.PublicGroups.Add(CreatePublicGroup(groupName, members));
-                return "craeted public group";
-            }           
-            
-        }
+        //    if (isPrivate)
+        //    {
+        //        dataStorage.PrivateGroups.Add(CreatePrivateGroup(groupName, admin, members));
+        //        return "craeted private group";
+        //    }
+        //    else
+        //    {
+        //        dataStorage.PublicGroups.Add(CreatePublicGroup(groupName, members));
+        //        return "craeted public group";
+        //    }                    
+        //}
 
         public PrivateGroup CreatePrivateGroup(string groupName, User admin, List<User> members)
         {
