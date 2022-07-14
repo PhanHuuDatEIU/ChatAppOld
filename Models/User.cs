@@ -11,8 +11,10 @@ namespace ChatApp.Models
         public string? UserName { get; set; }
         public string? Email { get; set; }
         public string? Password { get; set; }
+        public byte[]? Salt { get; set; } = null;
         public bool IsMale { get; set; } = true;
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
         public UserStatus Status { get; set; } = UserStatus.InActive;
+        public List<User> FriendList { get; set; } = new List<User>();
     }
 }

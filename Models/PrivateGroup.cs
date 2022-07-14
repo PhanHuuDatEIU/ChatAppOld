@@ -5,10 +5,10 @@ namespace ChatApp.Models
     public class PrivateGroup : IGroup
     {
         public int Id { get; set; }
-        public List<User> AdminList { get; set; }
+        public User GroupAdmin { get; set; }
 
         public string GroupName { get; set; }
 
-        public List<User> GroupMemberList { get; set; }
+        public List<User> GroupMemberList { get; set; } = new List<User>();
     }
 }

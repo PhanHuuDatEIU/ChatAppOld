@@ -8,6 +8,7 @@ namespace ChatApp.Models
 
         public string GroupName { get; set; }
 
-        public List<User> GroupMemberList { get; set; }
+        public List<User> GroupMemberList { get; set; } = new List<User>();
+
     }
 }
