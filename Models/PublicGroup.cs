@@ -6,6 +6,7 @@ namespace ChatApp.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public string InviteCode { get; set; }
         public IEnumerable<User> MemberList { get; set; }
     }
 }
