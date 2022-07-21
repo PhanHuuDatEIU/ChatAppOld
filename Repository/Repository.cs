@@ -9,11 +9,12 @@ namespace ChatApp.Repository
         {
             _list = new List<T>();
         }
+        
         public void Add(T entity)
         {
             _list.Add(entity);
         }
-
+        
         public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null)
         {
             IQueryable<T> query = _list.AsQueryable();
@@ -36,7 +37,7 @@ namespace ChatApp.Repository
                 query = query.Where(filter);
             }
            
-            return query.FirstOrDefault();
+            return query.FirstOrDefault(defaultValue:null);
         }
 
         public void Remove(T entity)
@@ -44,6 +45,5 @@ namespace ChatApp.Repository
             _list.Remove(entity);
         }
 
-       
     }
 }
