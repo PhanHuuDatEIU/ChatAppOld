@@ -32,17 +32,17 @@ namespace ChatApp.Services
         public PrivateGroup CreatePrivateGroup(string groupName, User admin, List<User> members)
         {
             PrivateGroup privateGroup = new PrivateGroup();
-            privateGroup.GroupName= groupName;
+            privateGroup.Name= groupName;
             privateGroup.GroupAdmin = admin;
-            privateGroup.GroupMemberList = members;
+            privateGroup.MemberList = members;
             return privateGroup;
         }
 
         public PublicGroup CreatePublicGroup(string groupName, List<User> members)
         {
             PublicGroup publicGroup = new PublicGroup();
-            publicGroup.GroupName= groupName;
-            publicGroup.GroupMemberList = members;
+            publicGroup.Name= groupName;
+            publicGroup.MemberList = members;
             return publicGroup;
         }
 
