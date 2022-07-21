@@ -1,7 +1,7 @@
 using ChatApp.Data;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using ChatApp.Models;ore.Cryptography.KeyDerivation;
+using ChatApp.Models;
 
 namespace ChatApp.Services
 {
