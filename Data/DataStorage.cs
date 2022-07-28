@@ -10,7 +10,7 @@ namespace ChatApp.Data
         public Repository<PrivateGroup> PrivateGroups { get; }
         public Repository<PublicGroup> PublicGroups { get; }
         public Repository<CFile> Files { get; }
-
+        public Repository<Alias> Aliases { get; }
         private static DataStorage _dataStorage { get; set; }
         private DataStorage()
         {
@@ -19,6 +19,7 @@ namespace ChatApp.Data
             PrivateGroups = new Repository<PrivateGroup>();
             PublicGroups = new Repository<PublicGroup>();
             Files = new Repository<CFile>();
+            Aliases = new Repository<Alias>();
         }
         
         public static DataStorage GetDataStorage()

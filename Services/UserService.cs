@@ -1,7 +1,7 @@
 using ChatApp.Data;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using ChatApp.Models;ore.Cryptography.KeyDerivation;
+using ChatApp.Models;
 
 namespace ChatApp.Services
 {
@@ -9,8 +9,7 @@ namespace ChatApp.Services
     {
         private readonly DataStorage dataStorage = DataStorage.GetDataStorage();
 
-        
-
+        #region user-crud
         public List<User>? FindFriend(User user, string name)
         {
             List<User>? userList = user.FriendList?.FindAll(friend => friend.UserName == name);
@@ -36,7 +35,6 @@ namespace ChatApp.Services
             return $"username: {aUser.UserName} and password: {aUser.Password}";
         }
 
-
         public void RegisterUser(string username, string password)
         {
             int userId = GenerateUserId();
@@ -49,7 +47,28 @@ namespace ChatApp.Services
             dataStorage.Users.Add(user);
         }
 
-        public int GenerateUserId()
+        #endregion
+
+        #region general
+        public bool SetAlias(User assignor, User Assignee, string context)
+        {
+            if (assignor != null && Assignee != null)
+            {
+                Alias alias = new Alias();
+                alias.AssignorID = assignor.Id;
+                alias.AssigneeID = Assignee.Id;
+                alias.Context = context;
+                dataStorage.Aliases.Add(alias);
+                return true;
+            }
+            return false;
+        }
+
+        #endregion
+
+        #region ultilities
+
+        private int GenerateUserId()
         {
             int id;
             if (dataStorage.Users.GetAll().ToArray() == null)
@@ -60,8 +79,8 @@ namespace ChatApp.Services
             return id;
         }
 
+        private string HashPassword(string password, byte[] salt)
 
-        public string HashPassword(string password, byte[]? salt)
         {
 
             string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
@@ -86,5 +105,6 @@ namespace ChatApp.Services
             return salt;
         }
 
+        #endregion
     }
 }
