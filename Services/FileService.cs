@@ -42,7 +42,7 @@ namespace ChatApp.Services
             }
             Message message = new()
             {
-                Id = GenerateMessageId(),
+                Id = messageService.GenerateMessageId(),
                 Path = @"\images\menuItems\" + fileName_new + extension,
                 InGroupId = groupId,
                 FromUserId = userId,
