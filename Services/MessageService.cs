@@ -35,5 +35,23 @@ namespace ChatApp.Services
             }
             return id;
         }
+
+        public List<Group> GetGroupOfUser(User user)
+        {
+            List<Group> groups = new List<Group>();
+            var getAllGroup = dataStorage.Groups.GetAll(group=>group.MemberList.Select(m=>m.Id).Contains(user.Id)).ToList();
+            return getAllGroup;
+        }
+
+        
+
+        public List<int> GetConversations(User user)
+        {
+            List<int> conversations = new List<int>();
+            conversations = dataStorage.Messages.GetAll(u => u.FromUserId == user.Id).Select(m => m.Id).ToList();
+            
+            return conversations;
+        }
+
     }
 }

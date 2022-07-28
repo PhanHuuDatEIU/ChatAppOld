@@ -1,6 +1,5 @@
 ﻿using ChatApp.Data;
 using ChatApp.Models;
-using ChatApp.Models.Interface;
 using System.Text;
 
 namespace ChatApp.Services
@@ -14,36 +13,29 @@ namespace ChatApp.Services
             dataStorage = DataStorage.GetDataStorage();
         }
 
-        //public string CreateNewGroup(string groupName,bool isPrivate = false, User? admin = null, List<User>? members = null)
-        //{
-            
-        //    if (isPrivate)
-        //    {
-        //        dataStorage.PrivateGroups.Add(CreatePrivateGroup(groupName, admin, members));
-        //        return "craeted private group";
-        //    }
-        //    else
-        //    {
-        //        dataStorage.PublicGroups.Add(CreatePublicGroup(groupName, members));
-        //        return "craeted public group";
-        //    }                    
-        //}
-
-        public PrivateGroup CreatePrivateGroup(string groupName, User admin, List<User> members)
+        public void CreatePrivateGroup(string groupName, User admin, List<User> members)
         {
-            PrivateGroup privateGroup = new PrivateGroup();
-            privateGroup.Name= groupName;
-            privateGroup.GroupAdmin = admin;
-            privateGroup.MemberList = members;
-            return privateGroup;
+            Group group = new PrivateGroup()
+            {
+                Id = GenerateGroupId(),
+                Name = groupName,
+                GroupAdmin = admin,
+                MemberList = members,
+                IsPrivate = true,
+            };
+            dataStorage.Groups.Add(group);
         }
 
-        public PublicGroup CreatePublicGroup(string groupName, List<User> members)
+        public void CreatePublicGroup(string groupName, List<User> members)
         {
-            PublicGroup publicGroup = new PublicGroup();
-            publicGroup.Name= groupName;
-            publicGroup.MemberList = members;
-            return publicGroup;
+            Group group = new PublicGroup()
+            {
+                Id= GenerateGroupId(),
+                Name = groupName,
+                MemberList = members,
+                IsPrivate= false,
+            };
+            dataStorage.Groups.Add(group);
         }
 
         #region public group 
@@ -154,7 +146,8 @@ namespace ChatApp.Services
             {
                 group.MemberList.Append(user);
                 return "User added";
-            } else
+            }
+            else
             {
                 return "User cannot be added";
             }
@@ -256,6 +249,15 @@ namespace ChatApp.Services
         {
             var group = dataStorage.PrivateGroups.GetFirstOrDefault(g => g.Id == groupID);
             return group;
+        }
+        private int GenerateGroupId()
+        {
+            int id = 0;
+            if (dataStorage.Groups.GetAll().ToArray() != null)
+            {
+                id = dataStorage.Groups.GetAll().ToArray().Length;
+            }
+            return id;
         }
         #endregion
     }
