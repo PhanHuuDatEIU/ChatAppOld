@@ -4,6 +4,7 @@ namespace ChatApp.Models
 {
     public class User
     {
+        
         public int Id { get; set; } = 0;
 
         public string? FirstName { get; set; }
