@@ -1,7 +1,9 @@
+
 using ChatApp.Data;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using ChatApp.Models;
+using ChatApp.Models.Enum;
 
 namespace ChatApp.Services
 {
@@ -20,30 +22,33 @@ namespace ChatApp.Services
             return userList;
         }
 
-        public string LoginByUsername(string username, string password)
+        public LoginStatus LoginByUsername(string username, string password)
         {
             User? aUser = dataStorage.Users.GetFirstOrDefault(user => user.UserName == username);
 
             if (aUser == null)
             {
-                return "user not found";
+                return LoginStatus.WrongUsername;
             }
             if (aUser.Password != HashPassword(password, aUser.Salt))
             {
-                return "Wrong password";
+                return LoginStatus.WrongPassword;
             }
-            return $"username: {aUser.UserName} and password: {aUser.Password}";
+            return LoginStatus.LoginSuccess;
         }
 
         public void RegisterUser(string username, string password)
         {
             int userId = GenerateUserId();
+            byte[]? salt = GetRandomSalt();
 
-            User user = new User();
-            user.Id = userId;
-            user.UserName = username;
-            user.Salt = GetRandomSalt(user.Salt);
-            user.Password = HashPassword(password, user.Salt);
+            User? user = new User()
+            {
+                Id = userId,
+                UserName = username,
+                Salt = salt,
+                Password = HashPassword(password, salt)
+            };
             dataStorage.Users.Add(user);
         }
 
@@ -74,22 +79,18 @@ namespace ChatApp.Services
         #endregion
 
         #region ultilities
-
         private int GenerateUserId()
         {
-            int id;
-            if (dataStorage.Users.GetAll().ToArray() == null)
+            int id = 0;
+            if (dataStorage.Users.GetAll().ToArray() != null)
             {
-                id = 0;
-            }
-            id = dataStorage.Users.GetAll().ToArray().Length;
+                id = dataStorage.Users.GetAll().ToArray().Length;
+            }          
             return id;
         }
 
         private string HashPassword(string password, byte[] salt)
-
         {
-
             string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
             password: password,
             salt: salt,
@@ -99,19 +100,15 @@ namespace ChatApp.Services
             return hashed;
         }
 
-        public byte[] GetRandomSalt(byte[]? salt)
+        private byte[] GetRandomSalt()
         {
-            if (salt == null)
+            byte[] salt = new byte[16];
+            using (var rngCsp = RandomNumberGenerator.Create())
             {
-                salt = new byte[16];
-                using (var rngCsp = new RNGCryptoServiceProvider())
-                {
-                    rngCsp.GetNonZeroBytes(salt);
-                }
+                rngCsp.GetNonZeroBytes(salt);
             }
             return salt;
         }
-
         #endregion
     }
 }

@@ -7,7 +7,6 @@ namespace ChatApp.Services
     {
         private readonly DataStorage dataStorage = DataStorage.GetDataStorage();
         private FileService fileService;
-
         public MessageService(FileService fileService)
         {
             this.fileService = fileService;
@@ -29,7 +28,6 @@ namespace ChatApp.Services
             }
             return false;
         }
-
         public bool DeleteMessage(int id, string webRootPath)
         {
             Message? message = dataStorage.Messages.GetFirstOrDefault(mess => mess.Id == id);

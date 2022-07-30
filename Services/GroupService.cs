@@ -13,7 +13,6 @@ namespace ChatApp.Services
             dataStorage = DataStorage.GetDataStorage();
             this.userService = userService;
         }
-
         //For all boolean methods in this, return if action is success
         #region general
         public List<Group> GetGroupOfUser(User user)
@@ -264,6 +263,15 @@ namespace ChatApp.Services
             return outBuffer.ToString();
         }
 
+        private int GenerateGroupId()
+        {
+            int id = 0;
+            if (dataStorage.Groups.GetAll().ToArray() != null)
+            {
+                id = dataStorage.Groups.GetAll().ToArray().Length;
+            }
+            return id;
+        }
         private int GenerateGroupId()
         {
             int id = 0;

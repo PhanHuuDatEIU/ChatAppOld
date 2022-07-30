@@ -7,6 +7,7 @@ namespace ChatApp.Data
     {
         public Repository<User> Users { get; }
         public Repository<Message> Messages { get; }
+
         public Repository<Group> Groups { get; }
         public Repository<CFile> Files { get; }
         public Repository<Alias> Aliases { get; }
@@ -19,7 +20,7 @@ namespace ChatApp.Data
             Files = new Repository<CFile>();
             Aliases = new Repository<Alias>();
         }
-        
+
         public static DataStorage GetDataStorage()
         {
             if (_dataStorage == null)
