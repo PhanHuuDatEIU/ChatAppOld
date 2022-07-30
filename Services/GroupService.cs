@@ -272,15 +272,6 @@ namespace ChatApp.Services
             }
             return id;
         }
-        private int GenerateGroupId()
-        {
-            int id = 0;
-            if (dataStorage.Groups.GetAll().ToArray() != null)
-            {
-                id = dataStorage.Groups.GetAll().ToArray().Length;
-            }
-            return id;
-        }
         #endregion
     }
 }
