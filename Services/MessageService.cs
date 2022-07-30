@@ -47,6 +47,13 @@ namespace ChatApp.Services
         #endregion
 
         #region output
+        public List<int> GetConversations(User user)
+        {
+            List<int> conversations = new List<int>();
+            conversations = dataStorage.Messages.GetAll(u => u.FromUserId == user.Id).Select(m => m.Id).ToList();
+
+            return conversations;
+        }
 
         public List<Message> GetTopLatestMessages(int groupId, int amount)
         {
@@ -56,6 +63,7 @@ namespace ChatApp.Services
                             .TakeLast(amount + 1)
                             .Take(amount)
                             .ToList();
+
             return messagesList;
         }
 
@@ -63,11 +71,12 @@ namespace ChatApp.Services
         {
             List<Message> messagesList;
             messagesList = dataStorage.Messages.GetAll(
-                            m => m.FromUserId == Userid || 
-                            m.InGroupId == groupId ||
+                            m => m.FromUserId == Userid &&
+                            m.InGroupId == groupId &&
                             m.Content.Contains(keyword))
                             .OrderBy(m => m.CreatedDate)
                             .ToList();
+
             return messagesList;
         }
         #endregion

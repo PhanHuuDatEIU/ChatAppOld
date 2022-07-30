@@ -50,6 +50,13 @@ namespace ChatApp.Services
         #endregion
 
         #region general
+
+        public User GetUser(int userId)
+        {
+            var user = dataStorage.Users.GetFirstOrDefault(u => u.Id == userId);
+            return user;
+        }
+
         public bool SetAlias(User assignor, User Assignee, string context)
         {
             if (assignor != null && Assignee != null)

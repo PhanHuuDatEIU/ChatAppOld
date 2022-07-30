@@ -7,48 +7,88 @@ namespace ChatApp.Services
     public class GroupService
     {
         private readonly DataStorage dataStorage;
-
-        public GroupService()
+        private UserService userService;
+        public GroupService(UserService userService)
         {
             dataStorage = DataStorage.GetDataStorage();
+            this.userService = userService;
         }
 
+        //For all boolean methods in this, return if action is success
         #region general
+        public List<Group> GetGroupOfUser(User user)
+        {
+            List<Group> groups = new List<Group>();
+            var getAllGroup = dataStorage.Groups.GetAll(group => group.MemberList.Select(m => m.Id)
+                                .Contains(user.Id)).ToList();
+            return getAllGroup;
+        }
+
         public bool RemoveUserFromGroup(int userId, int groupId)
         {
-            return false;
+            //remove the user from the member list
+            var group = GetGroupById(groupId);
+            var user = userService.GetUser(userId);
+            var index = group.MemberList.IndexOf(user);
+            if (index != -1)
+            {
+                group.MemberList.RemoveAt(index);
+                // transfer admin if private group and the user is admin
+                // check if the group is private first then admin role
+                if (group.IsPrivate)
+                {
+                    var privateGroup = (PrivateGroup)group;
+                    if (userId == privateGroup.Admin.Id)
+                    {
+                        //get the admin candidate - the next earliest user
+                        var candidate = group.MemberList[0];
+                        privateGroup.Admin = candidate;
+                    }
+                }
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         #endregion
 
         #region public group 
 
-        public PublicGroup CreatePublicGroup(string groupName, List<User> members)
+        public void CreatePublicGroup(string groupName, List<User> members)
         {
-            PublicGroup publicGroup = new PublicGroup();
-            publicGroup.GroupName= groupName;
-            publicGroup.GroupMemberList = members;
-            return publicGroup;
+            Group group = new PublicGroup()
+            {
+                Id = GenerateGroupId(),
+                Name = groupName,
+                MemberList = members,
+                IsPrivate = false,
+            };
+            GenerateInviteCode(group.Id);
+
+            dataStorage.Groups.Add(group);
         }
 
         public bool JoinPublicGroup(int userId, string inviteCode)
         {
             //validate user existance
-            var user = GetUser(userId);
+            var user = userService.GetUser(userId);
             if (user == null)
             {
                 return false;
             }
 
             //validate invite code
-            var group = GetPublicGroupByCode(inviteCode);
+            var group = GetGroupByCode(inviteCode);
             if (group == null)
             {
                 return false;
             }
 
             //validate if user is in group
-            foreach (var member in group.GroupMemberList)
+            foreach (var member in group.MemberList)
             {
                 if (member.Id == userId)
                 {
@@ -57,16 +97,117 @@ namespace ChatApp.Services
             }
 
             //add user to the group if all case satisfied
-            group.GroupMemberList.Append(user);
+            group.MemberList.Append(user);
             return true;
 
+        }
+
+        public bool AddUserPublic(int userId, int groupId)
+        {
+            //validate group existance
+            var group = GetPrivateGroupById(groupId);
+            if (group == null)
+            {
+                return false;
+            }
+
+            //validate user exitstance
+            var user = userService.GetUser(userId);
+            if (user == null)
+            {
+                return false;
+            }
+
+            group.MemberList.Append(user);
+            return true;
+        }
+
+        #endregion
+
+        #region private group
+
+        public void CreatePrivateGroup(string groupName, User admin, List<User> members)
+        {
+            Group group = new PrivateGroup()
+            {
+                Id = GenerateGroupId(),
+                Name = groupName,
+                Admin = admin,
+                MemberList = members,
+                IsPrivate = true,
+            };
+            dataStorage.Groups.Add(group);
+        }
+
+        public bool AddUserPrivate(int adminID, int userId, int groupId)
+        {
+            //validate group existance
+            var group = GetPrivateGroupById(groupId);
+            if (group == null)
+            {
+                return false;
+            }
+
+            //validate user exitstance
+            var user = userService.GetUser(userId);
+            if (user == null)
+            {
+                return false;
+            }
+
+            //If all condition are passed, add the user to the group if the admin is truthly an admin
+            if (group.Admin.Id == adminID)
+            {
+                group.MemberList.Append(user);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        #endregion
+
+        #region ultilities function
+
+        private Group GetGroupById(int groupId)
+        {
+            var group = dataStorage.Groups.GetFirstOrDefault(g => g.Id == groupId);
+            return group;
+        }
+
+        private PublicGroup GetPublicGroupById(int groupId)
+        {
+            var group = dataStorage.Groups.GetFirstOrDefault(g => g.Id == groupId && !g.IsPrivate);
+            return group as PublicGroup;
+        }
+
+        private PrivateGroup GetPrivateGroupById(int groupId)
+        {
+            var group = dataStorage.Groups.GetFirstOrDefault(g => g.Id == groupId && g.IsPrivate);
+            return group as PrivateGroup;
+        }
+
+        private PublicGroup GetGroupByCode(string inviteCode)
+        {
+            var groups = dataStorage.Groups.GetAll(g => g.IsPrivate == false);
+            foreach (var g in groups)
+            {
+                var group = g as PublicGroup;
+                if (group.InviteCode.Equals(inviteCode))
+                {
+                    return group;
+                }
+            }
+            return null;
         }
 
         /// <summary>
         /// Generate a unique group invite code 
         /// Should only be available for public group
         /// </summary>
-        public bool GenerateInviteCode(int groupId)
+        private bool GenerateInviteCode(int groupId)
         {
             string generatedInviteCode;
 
@@ -79,79 +220,18 @@ namespace ChatApp.Services
             else
             {
                 //Check if the group has an invite code
-                //then generate and check unique code if the group does not have invite code
+                //if not then generate and check unique code again  
                 if (String.IsNullOrEmpty(group.InviteCode))
                 {
                     do
                     {
                         generatedInviteCode = GenerateRandomString();
                     }
-                    while (!CheckUniqueCode(generatedInviteCode));
+                    while (GetGroupByCode(generatedInviteCode) != null);
                     group.InviteCode = generatedInviteCode;
                 }
                 return true;
             }
-        }
-        #endregion
-
-        #region private group
-
-        public PrivateGroup CreatePrivateGroup(string groupName, User admin, List<User> members)
-        {
-            PrivateGroup privateGroup = new PrivateGroup();
-            privateGroup.GroupName = groupName;
-            privateGroup.GroupAdmin = admin;
-            privateGroup.GroupMemberList = members;
-            return privateGroup;
-        }
-
-        public bool AddUser(int adminID, int userId, int groupId)
-        {
-            //validate group existance
-            var group = GetPrivateGroupByID(groupId);
-            if (group == null)
-            {
-                return false;
-            }
-
-            //validate user exitstance
-            var user = GetUser(userId);
-            if (user == null)
-            {
-                return false;
-            }
-
-            //If all condition are passed, add the user to the group if the admin is truthly an admin
-            if (group.GroupAdmin.Id == adminID)
-            {
-                group.GroupMemberList.Append(user);
-                return true;
-            } else
-            {
-                return false;
-            }
-        }
-
-        #endregion
-
-        #region ultilities function
-
-        private User GetUser(int userId)
-        {
-            var user = dataStorage.Users.GetFirstOrDefault(u => u.Id == userId);
-            return user;
-        }
-
-        private PublicGroup GetPublicGroupByCode(string inviteCode)
-        {
-            var group = dataStorage.PublicGroups.GetFirstOrDefault(g => g.InviteCode.Equals(inviteCode));
-            return group;
-        }
-
-        private PublicGroup GetPublicGroupById(int groupId)
-        {
-            var group = dataStorage.PublicGroups.GetFirstOrDefault(g => g.GroupId == groupId);
-            return group;
         }
 
         /// <summary>
@@ -184,28 +264,15 @@ namespace ChatApp.Services
             return outBuffer.ToString();
         }
 
-        /// <summary>
-        /// check if there is any group has the same invite code
-        /// </summary>
-        private Boolean CheckUniqueCode(string inviteCode)
+        private int GenerateGroupId()
         {
-            var existGroup = dataStorage.PublicGroups.GetFirstOrDefault(g => g.InviteCode.Equals(inviteCode));
-            if (existGroup == null)
+            int id = 0;
+            if (dataStorage.Groups.GetAll().ToArray() != null)
             {
-                return true;
+                id = dataStorage.Groups.GetAll().ToArray().Length;
             }
-            else
-            {
-                return false;
-            }
+            return id;
         }
-
-        private PrivateGroup GetPrivateGroupByID(int groupID)
-        {
-            var group = dataStorage.PrivateGroups.GetFirstOrDefault(g => g.GroupId == groupID);
-            return group;
-        }
-
         #endregion
     }
 }
