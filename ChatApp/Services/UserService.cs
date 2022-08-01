@@ -11,8 +11,7 @@ namespace ChatApp.Services
     {
         private readonly DataStorage dataStorage = DataStorage.GetDataStorage();
 
-
-
+        #region user-crud
         public List<User>? FindFriend(User user, string name)
         {
             List<User>? userList = user.FriendList?.FindAll(friend => friend.UserName == name);
@@ -38,7 +37,6 @@ namespace ChatApp.Services
             return LoginStatus.LoginSuccess;
         }
 
-
         public void RegisterUser(string username, string password)
         {
             int userId = GenerateUserId();
@@ -54,6 +52,33 @@ namespace ChatApp.Services
             dataStorage.Users.Add(user);
         }
 
+        #endregion
+
+        #region general
+
+        public User GetUser(int userId)
+        {
+            var user = dataStorage.Users.GetFirstOrDefault(u => u.Id == userId);
+            return user;
+        }
+
+        public bool SetAlias(User assignor, User Assignee, string context)
+        {
+            if (assignor != null && Assignee != null)
+            {
+                Alias alias = new Alias();
+                alias.AssignorID = assignor.Id;
+                alias.AssigneeID = Assignee.Id;
+                alias.Context = context;
+                dataStorage.Aliases.Add(alias);
+                return true;
+            }
+            return false;
+        }
+
+        #endregion
+
+        #region ultilities
         private int GenerateUserId()
         {
             int id = 0;
@@ -63,7 +88,6 @@ namespace ChatApp.Services
             }          
             return id;
         }
-
 
         private string HashPassword(string password, byte[] salt)
         {
@@ -85,5 +109,6 @@ namespace ChatApp.Services
             }
             return salt;
         }
+        #endregion
     }
 }

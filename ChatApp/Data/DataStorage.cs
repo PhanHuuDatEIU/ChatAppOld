@@ -7,17 +7,16 @@ namespace ChatApp.Data
     {
         public Repository<User> Users { get; }
         public Repository<Message> Messages { get; }
-        public Repository<PrivateGroup> PrivateGroups { get; }
-        public Repository<PublicGroup> PublicGroups { get; }
+
         public Repository<Group> Groups { get; }
+        public Repository<Alias> Aliases { get; }
         private static DataStorage _dataStorage { get; set; }
         private DataStorage()
         {
             Users = new Repository<User>();
             Messages = new Repository<Message>();
-            PrivateGroups = new Repository<PrivateGroup>();
-            PublicGroups = new Repository<PublicGroup>();
             Groups = new Repository<Group>();
+            Aliases = new Repository<Alias>();
         }
 
         public static DataStorage GetDataStorage()

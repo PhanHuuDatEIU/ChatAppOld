@@ -1,9 +1,7 @@
-﻿
-
-namespace ChatApp.Models
+﻿namespace ChatApp.Models
 {
     public class PublicGroup : Group
     {
-        public string InviteCode { get; set; }       
+        public string InviteCode { get; set; }
     }
 }

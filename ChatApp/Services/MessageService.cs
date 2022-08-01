@@ -11,6 +11,23 @@ namespace ChatApp.Services
         {
             this.fileService = fileService;
         }
+
+        #region input
+        public bool SendMessage(int uid, int groupId, string content)
+        {
+            if (content != null)
+            {
+                Message message = new Message();
+                message.Id = GenerateMessageId();
+                message.Content = content;
+                message.CreatedDate = DateTime.Now;
+                message.FromUserId = uid;
+                message.InGroupId = groupId;
+                dataStorage.Messages.Add(message);
+                return true;
+            }
+            return false;
+        }
         public bool DeleteMessage(int id, string webRootPath)
         {
             Message? message = dataStorage.Messages.GetFirstOrDefault(mess => mess.Id == id);
@@ -25,7 +42,44 @@ namespace ChatApp.Services
             }
             return false;
         }
+        #endregion
 
+        #region output
+        public List<int> GetConversations(User user)
+        {
+            List<int> conversations = new List<int>();
+            conversations = dataStorage.Messages.GetAll(u => u.FromUserId == user.Id).Select(m => m.Id).ToList();
+
+            return conversations;
+        }
+
+        public List<Message> GetTopLatestMessages(int groupId, int amount)
+        {
+            List<Message> messagesList;
+            messagesList = dataStorage.Messages.GetAll(g => g.Id == groupId)
+                            .OrderBy(m => m.CreatedDate)
+                            .TakeLast(amount + 1)
+                            .Take(amount)
+                            .ToList();
+
+            return messagesList;
+        }
+
+        public List<Message> GetMessages(int Userid, int groupId, string keyword)
+        {
+            List<Message> messagesList;
+            messagesList = dataStorage.Messages.GetAll(
+                            m => m.FromUserId == Userid &&
+                            m.InGroupId == groupId &&
+                            m.Content.Contains(keyword))
+                            .OrderBy(m => m.CreatedDate)
+                            .ToList();
+
+            return messagesList;
+        }
+        #endregion
+
+        #region ultilities
         public int GenerateMessageId()
         {
             int id = 0;
@@ -35,23 +89,6 @@ namespace ChatApp.Services
             }
             return id;
         }
-
-        public List<Group> GetGroupOfUser(User user)
-        {
-            List<Group> groups = new List<Group>();
-            var getAllGroup = dataStorage.Groups.GetAll(group=>group.MemberList.Select(m=>m.Id).Contains(user.Id)).ToList();
-            return getAllGroup;
-        }
-
-        
-
-        public List<int> GetConversations(User user)
-        {
-            List<int> conversations = new List<int>();
-            conversations = dataStorage.Messages.GetAll(u => u.FromUserId == user.Id).Select(m => m.Id).ToList();
-            
-            return conversations;
-        }
-
+        #endregion
     }
 }

@@ -5,8 +5,7 @@
         public int Id { get; set; }
 
         public string Name { get; set; }
-
-        public IEnumerable<User> MemberList { get; set; }
+        public List<User> MemberList { get; set; }
         public bool IsPrivate { get; set; }
     }
 }

@@ -45,5 +45,14 @@ namespace ChatApp.Repository
             _list.Remove(entity);
         }
 
+        public void Replace(T oldEntity, T newEntity)
+        {
+            int index = _list.IndexOf(oldEntity);
+            if (index != -1)
+            {
+                _list[index] = newEntity;
+            }
+        }
+
     }
 }
